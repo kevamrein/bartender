@@ -1,11 +1,13 @@
-export const defaultModel = 'grok-2-latest'
+export const defaultModel = 'grok-4-1-fast-non-reasoning'
 
 export interface ResponsesAPIResponse {
   output: any[]
   id: string
 }
 
-export async function xAIResponsesRequest(body: string): Promise<ResponsesAPIResponse> {
+export async function xAIResponsesRequest(
+  body: string
+): Promise<ResponsesAPIResponse> {
   const response = await fetch('https://api.x.ai/v1/responses', {
     method: 'POST',
     headers: {
@@ -17,7 +19,9 @@ export async function xAIResponsesRequest(body: string): Promise<ResponsesAPIRes
 
   if (!response.ok) {
     const errorText = await response.text()
-    throw new Error(`xAI API error: ${response.statusText}. Details: ${errorText}`)
+    throw new Error(
+      `xAI API error: ${response.statusText}. Details: ${errorText}`
+    )
   }
 
   const data = await response.json()
