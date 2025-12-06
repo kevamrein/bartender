@@ -1,0 +1,157 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Retro Bar Theme - Light Mode */
+  --background: 35 30% 96%;
+  --foreground: 25 25% 15%;
+
+  --card: 35 35% 92%;
+  --card-foreground: 25 25% 15%;
+
+  --popover: 35 35% 94%;
+  --popover-foreground: 25 25% 15%;
+
+  --primary: 35 80% 45%;
+  --primary-foreground: 35 30% 98%;
+
+  --secondary: 35 20% 85%;
+  --secondary-foreground: 25 25% 20%;
+
+  --muted: 35 15% 88%;
+  --muted-foreground: 25 15% 45%;
+
+  --accent: 350 50% 35%;
+  --accent-foreground: 35 30% 98%;
+
+  --destructive: 0 70% 45%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 35 20% 80%;
+  --input: 35 20% 85%;
+  --ring: 35 80% 45%;
+
+  /* Custom colors */
+  --amber: 35 80% 45%;
+  --amber-light: 35 70% 60%;
+  --amber-dark: 35 85% 30%;
+  --cream: 35 35% 92%;
+  --burgundy: 350 50% 35%;
+  --wood-brown: 25 35% 25%;
+
+  --radius: 0.5rem;
+}
+
+.dark {
+  /* Dark mode - evening bar ambiance */
+  --background: 25 30% 8%;
+  --foreground: 35 30% 90%;
+
+  --card: 25 25% 12%;
+  --card-foreground: 35 30% 90%;
+
+  --popover: 25 25% 10%;
+  --popover-foreground: 35 30% 90%;
+
+  --primary: 35 75% 50%;
+  --primary-foreground: 25 30% 10%;
+
+  --secondary: 25 20% 20%;
+  --secondary-foreground: 35 30% 85%;
+
+  --muted: 25 15% 18%;
+  --muted-foreground: 35 15% 60%;
+
+  --accent: 350 45% 45%;
+  --accent-foreground: 35 30% 95%;
+
+  --destructive: 0 65% 50%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 25 20% 22%;
+  --input: 25 20% 20%;
+  --ring: 35 75% 50%;
+
+  --amber: 35 75% 50%;
+  --amber-light: 35 65% 65%;
+  --amber-dark: 35 80% 35%;
+  --cream: 35 20% 85%;
+  --burgundy: 350 45% 45%;
+  --wood-brown: 25 25% 35%;
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: 'Libre Baskerville', serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Playfair Display', serif;
+}
+
+.vintage-border {
+  border-width: 2px;
+  border-color: hsl(var(--amber-dark) / 0.3);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 2px 4px rgba(0, 0, 0, 0.1),
+    0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.vintage-card {
+  background-color: hsl(var(--card));
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  border-width: 2px;
+  border-color: hsl(var(--amber-dark) / 0.3);
+  background-image:
+    linear-gradient(to bottom,
+      hsl(var(--card)) 0%,
+      hsl(35 30% 88%) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 2px 4px rgba(0, 0, 0, 0.1),
+    0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.dark .vintage-card {
+  background-image:
+    linear-gradient(to bottom,
+      hsl(var(--card)) 0%,
+      hsl(25 25% 10%) 100%);
+}
+
+.glass-effect {
+  backdrop-filter: blur(4px);
+  background-color: hsl(var(--card) / 0.8);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--amber-dark) / 0.5);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--amber-dark) / 0.7);
+}
