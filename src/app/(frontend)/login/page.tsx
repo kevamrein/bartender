@@ -1,15 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
-import { Wine } from 'lucide-react'
+import { Wine, Loader2 } from 'lucide-react'
 
-export default function LoginPage() {
+function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -44,60 +44,82 @@ export default function LoginPage() {
   }
 
   return (
+    <Card className="w-full max-w-md vintage-border">
+      <CardHeader className="text-center">
+        <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+          <Wine className="w-8 h-8 text-primary" />
+        </div>
+        <CardTitle className="text-3xl">Welcome Back</CardTitle>
+        <CardDescription>Sign in to your Bartender account</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {error && (
+            <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm text-center">
+              {error}
+            </div>
+          )}
+          <div className="space-y-2">
+            <label htmlFor="email" className="text-sm font-medium font-display">
+              Email
+            </label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <label htmlFor="password" className="text-sm font-medium font-display">
+              Password
+            </label>
+            <Input
+              id="password"
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? 'Signing in...' : 'Sign In'}
+          </Button>
+        </form>
+        <div className="mt-6 text-center text-sm text-muted-foreground">
+          Don&apos;t have an account?{' '}
+          <Link href="/register" className="text-primary hover:underline font-medium">
+            Create one
+          </Link>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+function LoginFallback() {
+  return (
+    <Card className="w-full max-w-md vintage-border">
+      <CardHeader className="text-center">
+        <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+          <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        </div>
+        <CardTitle className="text-3xl">Welcome Back</CardTitle>
+        <CardDescription>Loading...</CardDescription>
+      </CardHeader>
+    </Card>
+  )
+}
+
+export default function LoginPage() {
+  return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/30 p-4">
-      <Card className="w-full max-w-md vintage-border">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-            <Wine className="w-8 h-8 text-primary" />
-          </div>
-          <CardTitle className="text-3xl">Welcome Back</CardTitle>
-          <CardDescription>Sign in to your Bartender account</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm text-center">
-                {error}
-              </div>
-            )}
-            <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium font-display">
-                Email
-              </label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-medium font-display">
-                Password
-              </label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Signing in...' : 'Sign In'}
-            </Button>
-          </form>
-          <div className="mt-6 text-center text-sm text-muted-foreground">
-            Don&apos;t have an account?{' '}
-            <Link href="/register" className="text-primary hover:underline font-medium">
-              Create one
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
+      <Suspense fallback={<LoginFallback />}>
+        <LoginForm />
+      </Suspense>
     </div>
   )
 }
