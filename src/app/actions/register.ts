@@ -5,6 +5,11 @@ import { getPayload } from 'payload'
 import bcrypt from 'bcryptjs'
 
 export async function registerUser(formData: FormData) {
+  // Check if new account registration is allowed
+  if (process.env.NEXT_PUBLIC_ALLOW_NEW_ACCOUNTS === 'false') {
+    return { success: false, message: 'New account registration is currently disabled' }
+  }
+
   const email = formData.get('email') as string
   const password = formData.get('password') as string
   const firstName = formData.get('firstName') as string

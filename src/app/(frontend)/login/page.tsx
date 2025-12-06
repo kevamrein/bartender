@@ -89,12 +89,14 @@ function LoginForm() {
             {loading ? 'Signing in...' : 'Sign In'}
           </Button>
         </form>
-        <div className="mt-6 text-center text-sm text-muted-foreground">
-          Don&apos;t have an account?{' '}
-          <Link href="/register" className="text-primary hover:underline font-medium">
-            Create one
-          </Link>
-        </div>
+        {process.env.NEXT_PUBLIC_ALLOW_NEW_ACCOUNTS !== 'false' && (
+          <div className="mt-6 text-center text-sm text-muted-foreground">
+            Don&apos;t have an account?{' '}
+            <Link href="/register" className="text-primary hover:underline font-medium">
+              Create one
+            </Link>
+          </div>
+        )}
       </CardContent>
     </Card>
   )
