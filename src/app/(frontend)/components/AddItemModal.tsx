@@ -22,7 +22,7 @@ import { createInventoryItem, updateInventoryItem, type InventoryItem } from '@/
 interface AddItemModalProps {
   open: boolean
   onClose: () => void
-  onSuccess: () => void
+  onSuccess: (updatedItem?: InventoryItem) => void
   editItem?: InventoryItem | null
 }
 
@@ -47,7 +47,22 @@ export function AddItemModal({ open, onClose, onSuccess, editItem }: AddItemModa
         : await createInventoryItem(formData)
 
       if (result.success) {
-        onSuccess()
+        if (isEditing) {
+          // Construct the updated item for optimistic update
+          const updatedItem: InventoryItem = {
+            ...editItem,
+            name: formData.get('name') as string,
+            quantity: Number(formData.get('quantity')),
+            category: category as 'liquor' | 'mixer' | 'wine',
+            brand: (formData.get('brand') as string) || null,
+            notes: (formData.get('notes') as string) || null,
+            purchaseDate: (formData.get('purchaseDate') as string) || null,
+            updatedAt: new Date().toISOString(),
+          }
+          onSuccess(updatedItem)
+        } else {
+          onSuccess()
+        }
         onClose()
         setCategory('')
       } else {

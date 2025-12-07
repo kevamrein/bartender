@@ -64,8 +64,16 @@ export default function DashboardPage() {
     setEditingItem(null)
   }
 
-  const handleSuccess = () => {
-    loadItems()
+  const handleSuccess = (updatedItem?: InventoryItem) => {
+    if (updatedItem && editingItem) {
+      // Optimistically update the edited item in state
+      setItems((prev) =>
+        prev.map((item) => (item.id === updatedItem.id ? updatedItem : item))
+      )
+    } else {
+      // Reload all items for new additions (to get server-generated ID)
+      loadItems()
+    }
   }
 
   return (
