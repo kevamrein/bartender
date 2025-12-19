@@ -24,9 +24,16 @@ interface AddItemModalProps {
   onClose: () => void
   onSuccess: (updatedItem?: InventoryItem) => void
   editItem?: InventoryItem | null
+  activeAccountId?: string
 }
 
-export function AddItemModal({ open, onClose, onSuccess, editItem }: AddItemModalProps) {
+export function AddItemModal({
+  open,
+  onClose,
+  onSuccess,
+  editItem,
+  activeAccountId,
+}: AddItemModalProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [category, setCategory] = useState(editItem?.category || '')
@@ -48,8 +55,8 @@ export function AddItemModal({ open, onClose, onSuccess, editItem }: AddItemModa
 
     try {
       const result = isEditing
-        ? await updateInventoryItem(editItem.id, formData)
-        : await createInventoryItem(formData)
+        ? await updateInventoryItem(editItem.id, formData, activeAccountId)
+        : await createInventoryItem(formData, activeAccountId)
 
       if (result.success) {
         if (isEditing) {

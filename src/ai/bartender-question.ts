@@ -5,6 +5,7 @@ import { xAIResponsesRequest, extractAnswerFromResponse, defaultModel } from './
 export interface AskBartenderRequest {
   question: string
   userId: string
+  activeAccountId?: string
   previousResponseId?: string
 }
 
@@ -16,12 +17,14 @@ export interface AskBartenderResponse {
 export async function askBartenderQuestion(
   request: AskBartenderRequest
 ): Promise<AskBartenderResponse> {
-  const { question, userId, previousResponseId } = request
+  const { question, userId, activeAccountId, previousResponseId } = request
 
   let userContent = question
 
   if (!previousResponseId) {
-    const inventoryContext = await buildInventoryContext(userId)
+    // Use activeAccountId if provided, otherwise fall back to userId
+    const accountId = activeAccountId || userId
+    const inventoryContext = await buildInventoryContext(accountId)
     userContent = `Bar Inventory:\n${inventoryContext}\n\nUser's question: ${question}`
   }
 

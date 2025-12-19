@@ -18,16 +18,31 @@ export type InventoryItem = {
   updatedAt: string
 }
 
-export async function getInventoryItems(): Promise<InventoryItem[]> {
+export async function getInventoryItems(activeAccountId?: string): Promise<InventoryItem[]> {
   const session = await getSession()
   if (!session?.user?.id) return []
+
+  // Determine which account to query
+  const accountId = activeAccountId || session.user.id
+
+  // Validate user has access to this account
+  // For backward compatibility: if accessibleAccounts is missing (old JWT tokens),
+  // allow access to their own account
+  const hasAccess =
+    session.user.accessibleAccounts?.some((acc) => acc.id === accountId) ||
+    accountId === session.user.id
+
+  if (!hasAccess) {
+    console.error('Unauthorized access attempt to account:', accountId)
+    return []
+  }
 
   try {
     const payload = await getPayload({ config })
 
     const result = await payload.find({
       collection: 'inventory-items',
-      where: { owner: { equals: session.user.id } },
+      where: { owner: { equals: accountId } },
       sort: '-createdAt',
       limit: 100,
     })
@@ -39,15 +54,29 @@ export async function getInventoryItems(): Promise<InventoryItem[]> {
   }
 }
 
-export async function createInventoryItem(formData: FormData) {
+export async function createInventoryItem(formData: FormData, activeAccountId?: string) {
   const session = await getSession()
   if (!session?.user?.id) {
     return { success: false, message: 'Unauthorized' }
   }
 
+  // Determine which account to create item for
+  const accountId = activeAccountId || session.user.id
+
+  // Validate user has access to this account
+  // For backward compatibility: if accessibleAccounts is missing (old JWT tokens),
+  // allow access to their own account
+  const hasAccess =
+    session.user.accessibleAccounts?.some((acc) => acc.id === accountId) ||
+    accountId === session.user.id
+
+  if (!hasAccess) {
+    return { success: false, message: 'Unauthorized' }
+  }
+
   const name = formData.get('name') as string
   const quantity = Number(formData.get('quantity'))
-  const category = formData.get('category') as string
+  const category = formData.get('category') as 'liquor' | 'mixer' | 'wine'
   const brand = formData.get('brand') as string
   const notes = formData.get('notes') as string
   const purchaseDate = formData.get('purchaseDate') as string
@@ -68,7 +97,7 @@ export async function createInventoryItem(formData: FormData) {
         brand: brand || undefined,
         notes: notes || undefined,
         purchaseDate: purchaseDate || undefined,
-        owner: session.user.id,
+        owner: accountId,
       },
     })
 
@@ -80,23 +109,37 @@ export async function createInventoryItem(formData: FormData) {
   }
 }
 
-export async function updateInventoryItem(id: string, formData: FormData) {
+export async function updateInventoryItem(id: string, formData: FormData, activeAccountId?: string) {
   const session = await getSession()
   if (!session?.user?.id) {
+    return { success: false, message: 'Unauthorized' }
+  }
+
+  // Determine which account context we're in
+  const accountId = activeAccountId || session.user.id
+
+  // Validate user has access to this account
+  // For backward compatibility: if accessibleAccounts is missing (old JWT tokens),
+  // allow access to their own account
+  const hasAccess =
+    session.user.accessibleAccounts?.some((acc) => acc.id === accountId) ||
+    accountId === session.user.id
+
+  if (!hasAccess) {
     return { success: false, message: 'Unauthorized' }
   }
 
   try {
     const payload = await getPayload({ config })
 
-    // Verify ownership
+    // Verify ownership - item must belong to the active account
     const item = await payload.findByID({
       collection: 'inventory-items',
       id,
     })
 
     const ownerId = typeof item.owner === 'object' ? item.owner.id : item.owner
-    if (ownerId !== session.user.id) {
+    if (ownerId !== accountId) {
       return { success: false, message: 'Unauthorized' }
     }
 
@@ -106,7 +149,7 @@ export async function updateInventoryItem(id: string, formData: FormData) {
       data: {
         name: formData.get('name') as string,
         quantity: Number(formData.get('quantity')),
-        category: formData.get('category') as string,
+        category: formData.get('category') as 'liquor' | 'mixer' | 'wine',
         brand: (formData.get('brand') as string) || undefined,
         notes: (formData.get('notes') as string) || undefined,
         purchaseDate: (formData.get('purchaseDate') as string) || undefined,
@@ -121,23 +164,37 @@ export async function updateInventoryItem(id: string, formData: FormData) {
   }
 }
 
-export async function deleteInventoryItem(id: string) {
+export async function deleteInventoryItem(id: string, activeAccountId?: string) {
   const session = await getSession()
   if (!session?.user?.id) {
+    return { success: false, message: 'Unauthorized' }
+  }
+
+  // Determine which account context we're in
+  const accountId = activeAccountId || session.user.id
+
+  // Validate user has access to this account
+  // For backward compatibility: if accessibleAccounts is missing (old JWT tokens),
+  // allow access to their own account
+  const hasAccess =
+    session.user.accessibleAccounts?.some((acc) => acc.id === accountId) ||
+    accountId === session.user.id
+
+  if (!hasAccess) {
     return { success: false, message: 'Unauthorized' }
   }
 
   try {
     const payload = await getPayload({ config })
 
-    // Verify ownership
+    // Verify ownership - item must belong to the active account
     const item = await payload.findByID({
       collection: 'inventory-items',
       id,
     })
 
     const ownerId = typeof item.owner === 'object' ? item.owner.id : item.owner
-    if (ownerId !== session.user.id) {
+    if (ownerId !== accountId) {
       return { success: false, message: 'Unauthorized' }
     }
 

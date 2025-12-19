@@ -6,10 +6,13 @@ import { Header } from './components/Header'
 import { CategoryFilter } from './components/CategoryFilter'
 import { InventoryCard } from './components/InventoryCard'
 import { AddItemModal } from './components/AddItemModal'
+import { AccountSelector } from './components/AccountSelector'
+import { HouseholdModal } from './components/HouseholdModal'
 import { AIChatButton } from './components/AIChatModal'
 import { Button } from '@/components/ui/Button'
 import { getInventoryItems, deleteInventoryItem, type InventoryItem } from '@/app/actions/inventory'
-import { Plus, Wine, Loader2 } from 'lucide-react'
+import { getHouseholdMembers, type HouseholdMember } from '@/app/actions/household'
+import { Plus, Wine, Loader2, Users } from 'lucide-react'
 
 type Category = 'all' | 'liquor' | 'mixer' | 'wine'
 
@@ -20,21 +23,46 @@ export default function DashboardPage() {
   const [category, setCategory] = useState<Category>('all')
   const [showAddModal, setShowAddModal] = useState(false)
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null)
+  const [activeAccountId, setActiveAccountId] = useState(session?.user?.id || '')
+  const [showHouseholdModal, setShowHouseholdModal] = useState(false)
+  const [householdMembers, setHouseholdMembers] = useState<HouseholdMember[]>([])
+
+  // Update activeAccountId when session loads
+  useEffect(() => {
+    if (session?.user?.id && !activeAccountId) {
+      setActiveAccountId(session.user.id)
+    }
+  }, [session?.user?.id, activeAccountId])
 
   const loadItems = useCallback(async () => {
+    if (!activeAccountId) return
+
     try {
-      const data = await getInventoryItems()
+      const data = await getInventoryItems(activeAccountId)
       setItems(data)
     } catch (error) {
       console.error('Error loading items:', error)
     } finally {
       setLoading(false)
     }
+  }, [activeAccountId])
+
+  const loadHouseholdMembers = useCallback(async () => {
+    try {
+      const members = await getHouseholdMembers()
+      setHouseholdMembers(members)
+    } catch (error) {
+      console.error('Error loading household members:', error)
+    }
   }, [])
 
   useEffect(() => {
     loadItems()
   }, [loadItems])
+
+  const handleAccountChange = (accountId: string) => {
+    setActiveAccountId(accountId)
+  }
 
   const filteredItems = items.filter(
     (item) => category === 'all' || item.category === category
@@ -48,10 +76,15 @@ export default function DashboardPage() {
   }
 
   const handleDelete = async (id: string) => {
-    const result = await deleteInventoryItem(id)
+    const result = await deleteInventoryItem(id, activeAccountId)
     if (result.success) {
       setItems((prev) => prev.filter((item) => item.id !== id))
     }
+  }
+
+  const handleOpenHouseholdModal = () => {
+    loadHouseholdMembers()
+    setShowHouseholdModal(true)
   }
 
   const handleEdit = (item: InventoryItem) => {
@@ -83,12 +116,37 @@ export default function DashboardPage() {
       <main className="container mx-auto px-4 py-8">
         {/* Hero Section */}
         <div className="mb-8">
-          <h1 className="font-display text-4xl md:text-5xl font-bold mb-2">
-            Welcome back{session?.user?.firstName ? `, ${session.user.firstName}` : ''}
-          </h1>
-          <p className="text-muted-foreground text-lg">
-            Your personal bar inventory at a glance
-          </p>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+            <div>
+              <h1 className="font-display text-4xl md:text-5xl font-bold mb-2">
+                Welcome back
+                {session?.user?.accessibleAccounts &&
+                  activeAccountId &&
+                  (() => {
+                    const activeAccount = session.user.accessibleAccounts.find(
+                      (acc) => acc.id === activeAccountId
+                    )
+                    return activeAccount ? `, ${activeAccount.name}` : ''
+                  })()}
+              </h1>
+              <p className="text-muted-foreground text-lg">
+                Your personal bar inventory at a glance
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3">
+              {session?.user?.accessibleAccounts && (
+                <AccountSelector
+                  accessibleAccounts={session.user.accessibleAccounts}
+                  activeAccountId={activeAccountId}
+                  onAccountChange={handleAccountChange}
+                />
+              )}
+              <Button variant="outline" onClick={handleOpenHouseholdModal}>
+                <Users className="w-4 h-4 mr-2" />
+                🍸 My Bar Patrons
+              </Button>
+            </div>
+          </div>
         </div>
 
         {/* Stats Cards */}
@@ -139,10 +197,19 @@ export default function DashboardPage() {
         onClose={handleModalClose}
         onSuccess={handleSuccess}
         editItem={editingItem}
+        activeAccountId={activeAccountId}
+      />
+
+      {/* Household Modal */}
+      <HouseholdModal
+        open={showHouseholdModal}
+        onClose={() => setShowHouseholdModal(false)}
+        members={householdMembers}
+        onSuccess={loadHouseholdMembers}
       />
 
       {/* AI Chat Button */}
-      <AIChatButton />
+      <AIChatButton activeAccountId={activeAccountId} />
     </div>
   )
 }

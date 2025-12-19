@@ -19,7 +19,11 @@ interface Message {
   content: string
 }
 
-export function AIChatButton() {
+interface AIChatButtonProps {
+  activeAccountId?: string
+}
+
+export function AIChatButton({ activeAccountId }: AIChatButtonProps) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -31,7 +35,7 @@ export function AIChatButton() {
       >
         <MessageCircle className="h-6 w-6" />
       </Button>
-      <AIChatModal open={open} onClose={() => setOpen(false)} />
+      <AIChatModal open={open} onClose={() => setOpen(false)} activeAccountId={activeAccountId} />
     </>
   )
 }
@@ -39,9 +43,10 @@ export function AIChatButton() {
 interface AIChatModalProps {
   open: boolean
   onClose: () => void
+  activeAccountId?: string
 }
 
-function AIChatModal({ open, onClose }: AIChatModalProps) {
+function AIChatModal({ open, onClose, activeAccountId }: AIChatModalProps) {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -51,6 +56,12 @@ function AIChatModal({ open, onClose }: AIChatModalProps) {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  // Reset conversation when switching accounts
+  useEffect(() => {
+    setMessages([])
+    setResponseId(undefined)
+  }, [activeAccountId])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -65,7 +76,11 @@ function AIChatModal({ open, onClose }: AIChatModalProps) {
       const res = await fetch('/api/ask-bartender', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: userMessage, responseId }),
+        body: JSON.stringify({
+          question: userMessage,
+          responseId,
+          activeAccountId,
+        }),
       })
 
       const data = await res.json()

@@ -3,6 +3,7 @@ import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
 import config from '@payload-config'
+import { getUserAccountInfo, type AccountAccess } from './account-utils'
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -62,6 +63,12 @@ export const authOptions: NextAuthOptions = {
         token.email = user.email
         token.firstName = user.firstName
         token.lastName = user.lastName
+
+        // Fetch account info including accessible accounts
+        const accountInfo = await getUserAccountInfo(user.id)
+        if (accountInfo) {
+          token.accessibleAccounts = accountInfo.accessibleAccounts
+        }
       }
       return token
     },
@@ -71,6 +78,7 @@ export const authOptions: NextAuthOptions = {
         session.user.email = token.email as string
         session.user.firstName = token.firstName as string
         session.user.lastName = token.lastName as string
+        session.user.accessibleAccounts = (token.accessibleAccounts as AccountAccess[]) || []
       }
       return session
     },
@@ -92,6 +100,7 @@ declare module 'next-auth' {
       email: string
       firstName: string
       lastName: string
+      accessibleAccounts: AccountAccess[]
     }
   }
   interface User {
@@ -108,5 +117,6 @@ declare module 'next-auth/jwt' {
     email: string
     firstName: string
     lastName: string
+    accessibleAccounts: AccountAccess[]
   }
 }
