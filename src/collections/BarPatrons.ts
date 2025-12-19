@@ -5,6 +5,23 @@ export const BarPatrons: CollectionConfig = {
   admin: {
     useAsTitle: 'email',
   },
+  access: {
+    // Only Payload admin users (from Users collection) can access this via Payload CMS
+    // Bar patrons use NextAuth separately and never touch Payload
+    read: ({ req: { user } }) => {
+      // Must be logged into Payload as an admin user
+      return !!user
+    },
+    create: ({ req: { user } }) => {
+      return !!user
+    },
+    update: ({ req: { user } }) => {
+      return !!user
+    },
+    delete: ({ req: { user } }) => {
+      return !!user
+    },
+  },
   fields: [
     {
       name: 'email',

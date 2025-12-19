@@ -30,7 +30,7 @@ export async function getUserAccountInfo(userId: string): Promise<UserAccountInf
 
     // Create own account object
     const ownAccount: AccountAccess = {
-      id: user.id,
+      id: String(user.id),
       name: [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email,
       email: user.email as string,
     }
@@ -50,7 +50,7 @@ export async function getUserAccountInfo(userId: string): Promise<UserAccountInf
 
           if (householdUser) {
             householdAccounts.push({
-              id: householdUser.id,
+              id: String(householdUser.id),
               name:
                 [householdUser.firstName, householdUser.lastName].filter(Boolean).join(' ') ||
                 householdUser.email,

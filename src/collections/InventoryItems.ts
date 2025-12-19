@@ -6,6 +6,22 @@ export const InventoryItems: CollectionConfig = {
     useAsTitle: 'name',
     defaultColumns: ['name', 'category', 'quantity', 'brand', 'owner'],
   },
+  access: {
+    // Only Payload admin users can access inventory via Payload CMS
+    // Bar patrons access inventory through NextAuth-protected API routes
+    read: ({ req: { user } }) => {
+      return !!user
+    },
+    create: ({ req: { user } }) => {
+      return !!user
+    },
+    update: ({ req: { user } }) => {
+      return !!user
+    },
+    delete: ({ req: { user } }) => {
+      return !!user
+    },
+  },
   fields: [
     {
       name: 'name',
