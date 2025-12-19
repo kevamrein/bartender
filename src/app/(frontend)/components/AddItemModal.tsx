@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -32,6 +32,11 @@ export function AddItemModal({ open, onClose, onSuccess, editItem }: AddItemModa
   const [category, setCategory] = useState(editItem?.category || '')
 
   const isEditing = !!editItem
+
+  // Update category when editItem changes
+  useEffect(() => {
+    setCategory(editItem?.category || '')
+  }, [editItem])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
