@@ -35,11 +35,11 @@ export async function getHouseholdMembers(): Promise<HouseholdMember[]> {
     })
 
     return result.docs.map((doc) => ({
-      id: doc.id,
+      id: String(doc.id),
       email: doc.email as string,
       firstName: doc.firstName as string | undefined,
       lastName: doc.lastName as string | undefined,
-      createdAt: doc.createdAt,
+      createdAt: doc.createdAt as string,
     }))
   } catch (error) {
     console.error('Error fetching household members:', error)
