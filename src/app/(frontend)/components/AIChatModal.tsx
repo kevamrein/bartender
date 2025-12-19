@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/Dialog'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
-import { MessageCircle, Send, Loader2, Sparkles } from 'lucide-react'
+import { MessageCircle, Send, Loader2, Sparkles, RotateCcw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -113,6 +113,12 @@ function AIChatModal({ open, onClose, activeAccountId }: AIChatModalProps) {
     }
   }
 
+  const handleClearContext = () => {
+    setMessages([])
+    setResponseId(undefined)
+    setInput('')
+  }
+
   const suggestedQuestions = [
     "What cocktails can I make?",
     "What should I buy next?",
@@ -123,10 +129,23 @@ function AIChatModal({ open, onClose, activeAccountId }: AIChatModalProps) {
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-lg h-[600px] flex flex-col p-0 gap-0">
         <DialogHeader className="p-4 border-b">
-          <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-primary" />
-            Ask Your Bartender
-          </DialogTitle>
+          <div className="flex items-center justify-between pr-10">
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-primary" />
+              Ask Your Bartender
+            </DialogTitle>
+            {messages.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleClearContext}
+                className="gap-2"
+              >
+                <RotateCcw className="w-4 h-4" />
+                Ask a new question
+              </Button>
+            )}
+          </div>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
